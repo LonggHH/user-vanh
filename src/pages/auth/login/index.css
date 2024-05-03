@@ -1,0 +1,22 @@
+.login-input {
+  background-color: #f7f7f7;
+  border: 0;
+  border-bottom: 1px solid #ababab;
+  box-shadow: 0 1px 0 0 transparent;
+  color: #1b1b1b;
+  display: inline-block;
+  min-height: 2.25em;
+  padding: 12px;
+  width: 100%;
+  font-size: 16px;
+  outline: none;
+  -webkit-tap-highlight-color: rgba(55, 134, 148, 0.25);
+}
+
+.login-input:focus {
+  background-color: #fff;
+  outline-offset: 0.25em;
+  border-color: rgba(55, 134, 148, 0.25);
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+    rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}

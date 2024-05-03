@@ -1,0 +1,17 @@
+#category-block {
+    display: none;
+}
+
+#categoty-title:hover>#category-block {
+    display: block;
+}
+
+.ant-dropdown-menu {
+    width: 170px;
+    top: 20px;
+    border-radius: 0 !important;
+}
+
+.brand-select:hover {
+    color: #f00;
+}
