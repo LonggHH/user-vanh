@@ -1,10 +1,33 @@
-import { Button, Input } from "antd";
-import React from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../../../public/images/logo-header.svg";
 import "./index.css";
+import { message } from "antd";
+import { saveAccount } from "../../../redux/slices/account";
+import instanceAxios from "../../../configs/axios";
+import { useDispatch } from "react-redux";
+
+const PASSWORDTYPE = {
+    PASSWORD: "password",
+    TEXT: "text"
+}
 
 export default function Login() {
+
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const [passwordType, setPasswordType] = useState(PASSWORDTYPE.PASSWORD);
+    const [messageApi, contextHolder] = message.useMessage();
+
+
+    const togglePassword = () => {
+        if (passwordType === PASSWORDTYPE.PASSWORD) {
+            setPasswordType(PASSWORDTYPE.TEXT)
+        } else {
+            setPasswordType(PASSWORDTYPE.PASSWORD)
+        }
+    }
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -14,12 +37,33 @@ export default function Login() {
             values[name] = value;
         }
 
-        console.log(values);
+        const { email, password } = values;
+
+        try {
+            const result = await instanceAxios.post("/auth/login", { email, password, role: "user" })
+            if (result.data.statusCode === 200) {
+                e.target.reset();
+                messageApi.open({
+                    type: 'success',
+                    content: 'Login success !',
+                });
+                dispatch(saveAccount(result.data.data))
+                localStorage.setItem("user_login", JSON.stringify(result.data.data));
+                navigate("/")
+            }
+        } catch (error) {
+            console.log(error);
+            messageApi.open({
+                type: 'error',
+                content: error.response.data.message,
+            });
+        }
     }
 
 
     return (
         <>
+            {contextHolder}
             <header className="mt-[40px] px-5 border-b h-[72px] flex items-center">
                 <Link to="/">
                     <img src={Logo} alt="Logo" />
@@ -59,7 +103,7 @@ export default function Login() {
                         <div className="flex flex-col gap-2 mb-2">
                             <label
                                 className="text-[18px] uppercase font-semibold"
-                                htmlFor="email"
+                                htmlFor="password"
                             >
                                 Password &#42;
                             </label>
@@ -67,17 +111,17 @@ export default function Login() {
                                 id="password"
                                 name="password"
                                 className="login-input"
-                                type="text"
+                                type={passwordType}
                                 placeholder="Enter a valid password"
                             />
                         </div>
                         <span>
-                            Passwords need at least 08 characters (including letters and numbers). Only
-                            Can use these special characters -_.@
+                            Passwords need at least 06 characters (including letters and numbers).
+                            {/* Only can use these special characters -_.@ */}
                         </span>
                         <div className="flex items-center gap-3 mt-5 mb-5">
-                            <input className="w-5 h-5" type="checkbox" name="" id="" />
-                            <span>Show password</span>
+                            <input className="w-5 h-5" type="checkbox" name="" id="showPass" onChange={togglePassword} />
+                            <label htmlFor="showPass">{PASSWORDTYPE.PASSWORD === passwordType ? "Show" : "Hidden"} password</label>
                         </div>
                         <div className="text-[#1b1b1b] underline uppercase font-semibold text-[18px] flex flex-col gap-2 mb-[40px]">
                             <Link>Terms of use</Link>

@@ -17,10 +17,10 @@ export default function Navbar() {
     const navigate = useNavigate();
     const [showInput, setShowInput] = useState(false);
     const [showModalLogin, setShowModalLogin] = useState(false);
-    const isLogin = true;
     const [showCategory, setShowCategory] = useState(false);
     const [showModalLogout, setShowModalLogout] = useState(false);
-    console.log(showModalLogout);
+    // console.log(showModalLogout);
+    const isLogin = useSelector(state => state.account.data);
 
     const categories = useSelector(state => state.category.data);
     /**
@@ -189,7 +189,7 @@ export default function Navbar() {
                                     <div onClick={handleRedirect} className="relative">
                                         <FavoriteBorderIcon className="cursor-pointer text-[24px]" />
                                         <span className="absolute px-2 py-0 rounded-full top-[-3px] right-[-18px] text-[10px] bg-[#EB3333] text-white font-semibold">
-                                            2
+                                            0
                                         </span>
                                     </div>
                                 </Tooltip>
@@ -197,7 +197,7 @@ export default function Navbar() {
                                     <Link to="/cart" className="relative">
                                         <ShoppingCartIcon className="cursor-pointer text-[24px]" />
                                         <span className="absolute px-2 py-0 rounded-full top-[-3px] right-[-18px] text-[10px] bg-[#EB3333] text-white font-semibold">
-                                            2
+                                            0
                                         </span>
                                     </Link>
                                 </Tooltip>

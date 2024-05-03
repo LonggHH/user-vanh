@@ -5,8 +5,10 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { Rate } from "antd";
+import { Rate, message } from "antd";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+
+const SIZE = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function ProductDetail() {
 
@@ -16,6 +18,10 @@ export default function ProductDetail() {
     const [showMaterial, setShowMaterial] = useState(false);
     const [showQuantity, setShowQuantity] = useState(false);
 
+    const [quantity, setQuantity] = useState(1);
+    const [selectVariation, setSelectVariation] = useState(product?.variations[0] || {});
+    const [size, setSize] = useState(SIZE[3]);
+
     const images = [
         `${product.defaultImage}`,
         ...product.images.map((item) => item.image_path),
@@ -23,6 +29,8 @@ export default function ProductDetail() {
     ];
 
     const [currentIndex, setCurrentIndex] = useState(0);
+
+    const [messageApi, contextHolder] = message.useMessage();
 
     const handleNextImage = () => {
         setCurrentIndex((prevIndex) =>
@@ -41,18 +49,37 @@ export default function ProductDetail() {
         const index = images.indexOf(imageVariation);
         if (index !== -1) {
             setCurrentIndex(index);
+            setSelectVariation(variation);
         }
+    };
+
+    const handleChangeQuantity = (value) => {
+        setQuantity(value);
+    };
+
+    const handleClickSize = (value) => {
+        setSize(value);
     }
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
+        // console.log("add to cart", selectVariation, quantity);
         const userLogin = JSON.parse(localStorage.getItem("user_login")) || null;
         if (!userLogin) {
-
+            messageApi.open({
+                type: 'error',
+                content: 'Not logged in!',
+            });
+        } else {
+            messageApi.open({
+                type: 'success',
+                content: 'Ready to buy!',
+            });
         }
-    }
+    };
 
     return (
         <>
+            {contextHolder}
             <main className="mx-[124px] mb-[88px]">
                 <div className="mt-[15px] mb-[52px] flex gap-2 font-normal text-[12px] uppercase">
                     <Link className="underline">Uniqlo</Link>
@@ -321,7 +348,7 @@ export default function ProductDetail() {
                                     <div
                                         key={variation.id}
                                         className={`size-[45px] border`}
-                                        style={{ backgroundColor: `${variation.color}`, cursor: "pointer" }}
+                                        style={{ backgroundColor: `${variation.color}`, cursor: "pointer", boxShadow: `${variation.id === selectVariation.id ? "1px 1px 1px 1px #333" : "none"}` }}
                                         onClick={() => handleClickColor(variation)}
                                     ></div>
                                 ))}
@@ -330,8 +357,8 @@ export default function ProductDetail() {
                         <aside>
                             {/* <div className="uppercase text-[14px] font-semibold flex items-center justify-between">
                                 <div>
-                                    <strong className="mr-1">Kích thước:</strong>
-                                    <span>Nữ S</span>
+                                    <strong className="mr-1">Size:</strong>
+                                    <span>FEMALE S</span>
                                 </div>
                                 <div className="flex items-center uppercase text-[14px] font-bold">
                                     <strong className="mr-1">
@@ -342,44 +369,24 @@ export default function ProductDetail() {
                                             alt=""
                                         />
                                     </strong>
-                                    <Link className="underline">Chọn kích thước</Link>
+                                    <Link className="underline">Select the size</Link>
                                 </div>
-                            </div> */}
-                            {/* <div className="flex gap-2 mt-[11px] mb-5">
-                                <div
-                                    className={`size-[45px] border bg-white text-center leading-[45px]`}
-                                >
-                                    XS
-                                </div>
-                                <div
-                                    className={`size-[45px] border bg-white text-center leading-[45px]`}
-                                >
-                                    S
-                                </div>
-                                <div
-                                    className={`size-[45px] border bg-white text-center leading-[45px]`}
-                                >
-                                    M
-                                </div>
-                                <div
-                                    className={`size-[45px] border bg-white text-center leading-[45px]`}
-                                >
-                                    L
-                                </div>
-                                <div
-                                    className={`size-[45px] border bg-white text-center leading-[45px]`}
-                                >
-                                    XL
-                                </div>
-                                <div
-                                    className={`size-[45px] border bg-white text-center leading-[45px]`}
-                                >
-                                    XXL
-                                </div>
-                            </div> */}
-                            {/* <div>
+                            </div>
+                            <div className="flex gap-2 mt-[11px] mb-5">
+                                {SIZE.map((item, i) => (
+                                    <div
+                                        key={i}
+                                        onClick={() => handleClickSize(item)}
+                                        style={{ boxShadow: `${size === item ? "1px 1px 1px 1px #333" : "none"}` }}
+                                        className={`size-[45px] border bg-white text-center leading-[45px]`}
+                                    >
+                                        {item}
+                                    </div>
+                                ))}
+                            </div>
+                            <div>
                                 <button className="h-[45px] text-[16px] uppercase font-bold hover:opacity-70 border border-[#7d7d7d] w-full py-2 px-1">
-                                    Kích thước theo chiều cao
+                                    Size by height
                                 </button>
                             </div> */}
                             <div className="mt-4">
@@ -388,7 +395,7 @@ export default function ProductDetail() {
                                 </label>
                                 <div className="w-[134px] mt-4 relative">
                                     <div className="border px-3 h-[45px] flex items-center justify-between">
-                                        <span>1</span>
+                                        <span>{quantity}</span>
                                         <KeyboardArrowDownIcon
                                             id="icon-dropdown"
                                             onClick={() => setShowQuantity(!showQuantity)}
@@ -398,15 +405,14 @@ export default function ProductDetail() {
                                     </div>
                                     {showQuantity && (
                                         <ul className="w-full border absolute bg-white z-20">
-                                            <li className="p-3 cursor-pointer hover:bg-[#f6f6f6]">
-                                                1
-                                            </li>
-                                            <li className="p-3 cursor-pointer hover:bg-[#f6f6f6]">
-                                                2
-                                            </li>
-                                            <li className="p-3 cursor-pointer hover:bg-[#f6f6f6]">
-                                                3
-                                            </li>
+                                            {Array(3).fill().map((_, i) => (
+                                                <li
+                                                    key={i}
+                                                    onClick={() => handleChangeQuantity(i + 1)}
+                                                    className="p-3 cursor-pointer hover:bg-[#f6f6f6]">
+                                                    {i + 1}
+                                                </li>
+                                            ))}
                                         </ul>
                                     )}
                                 </div>
@@ -429,7 +435,7 @@ export default function ProductDetail() {
                                 </button>
                             </div> */}
                             <div className="border-b my-5"></div>
-                            <div className="text-[16px] uppercase font-bold">Chia sẻ</div>
+                            <div className="text-[16px] uppercase font-bold">SHARE</div>
                             <div className="flex items-center gap-6 mt-3">
                                 <img
                                     height={45}
