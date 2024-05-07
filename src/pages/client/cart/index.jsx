@@ -66,6 +66,12 @@ export default function Cart() {
     }
 
     const handleClickCkeckout = () => {
+
+        if (cart.length === 0) {
+            message.error("Cart empty")
+            return
+        }
+
         localStorage.setItem("total_orders", JSON.stringify(total));
         navigate('/checkout')
     }
