@@ -7,6 +7,7 @@ import variationSlice from './variation.js'
 import orderSlice from './order.js'
 import accountSlice from './account.js'
 import cartSlice from './cart.js'
+import wishlistSlice from './wishlist.js'
 
 export const rootReducer = combineReducers({
     auth: authSlice,
@@ -17,4 +18,5 @@ export const rootReducer = combineReducers({
     order: orderSlice,
     account: accountSlice,
     cart: cartSlice,
+    wishlist: wishlistSlice,
 })

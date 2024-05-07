@@ -24,6 +24,7 @@ export default function Navbar() {
 
     const categories = useSelector(state => state.category.data);
     const cart = useSelector(state => state.cart.data);
+    const wishlist = useSelector(state => state.wishlist.data)
     /**
      * Kiểm tra đăng nhập và chuyển hướng
      */
@@ -167,7 +168,7 @@ export default function Navbar() {
                                     <div onClick={handleRedirect} className="relative">
                                         <FavoriteBorderIcon className="cursor-pointer text-[24px]" />
                                         <span className="absolute px-2 py-0 rounded-full top-[-3px] right-[-18px] text-[10px] bg-[#EB3333] text-white font-semibold">
-                                            0
+                                            {wishlist.length}
                                         </span>
                                     </div>
                                 </Tooltip>

@@ -27,6 +27,7 @@ import { getCategories } from "./redux/slices/category";
 import { getBrands } from "./redux/slices/brand";
 import { getProducts } from "./redux/slices/products";
 import { getCart } from "./redux/slices/cart";
+import { getWishlists } from "./redux/slices/wishlist";
 
 export default function App() {
     const location = useLocation();
@@ -46,6 +47,7 @@ export default function App() {
         dispatch(getBrands())
         dispatch(getProducts())
         dispatch(getCart(account?.id))
+        dispatch(getWishlists(account?.id))
     }, [])
 
     return (

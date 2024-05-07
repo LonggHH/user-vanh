@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Breadcrumb, Rate } from "antd";
+import { Breadcrumb, Rate, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import "./index.css";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import instanceAxios from "../../../configs/axios";
+import { getWishlists } from "../../../redux/slices/wishlist"
 
 export default function Collection() {
     // const [tab, setTab] = useState(1);
@@ -15,10 +17,13 @@ export default function Collection() {
     });
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const categories = useSelector(state => state.category.data);
     const [selectCategory, setSelectCategory] = useState(categories[0] || null);
     const products = useSelector(state => state.product.data);
+    const account = useSelector(state => state.account.data);
+    const wishlist = useSelector(state => state.wishlist.data);
 
     // const [productShow, setProductShow] = useState(products.filter(e => e.category.id === selectCategory.id));
     const [selectBrandId, setSelectBrandId] = useState(0);
@@ -81,6 +86,21 @@ export default function Collection() {
     const handleClickType = (id) => {
         setSelectBrandId(id);
     }
+
+    const handleChangeWishlist = async (productId) => {
+        const data = { accountId: account?.id, productId }
+        if (data.accountId) {
+            try {
+                const result = await instanceAxios.put(`/accounts/change-wishlists`, { accountId: account.id, productId })
+                dispatch(getWishlists(account.id))
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            message.error("Login")
+        }
+    }
+
 
     return (
         <>
@@ -235,7 +255,10 @@ export default function Collection() {
                                             src={product.defaultImage}
                                             alt=""
                                         />
-                                        <FavoriteBorderIcon className="absolute top-[10px] right-[10px]" />
+                                        <FavoriteBorderIcon
+                                            className={`absolute top-[10px] right-[10px] cursor-pointer ${wishlist.some(item => item.product_id === product.id) ? "text-red-500" : ""}`}
+                                            onClick={() => handleChangeWishlist(product.id)}
+                                        />
                                     </div>
                                     <div className="my-[20px]" style={{ display: "flex", gap: 4 }}>
                                         {product.variations.map((variation) => (
