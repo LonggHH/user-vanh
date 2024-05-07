@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./index.css";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -7,12 +7,34 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Rate, message } from "antd";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import instanceAxios from "../../../configs/axios";
+import { useDispatch, useSelector } from "react-redux";
+import { getCart } from "../../../redux/slices/cart";
 
 const SIZE = ["XS", "S", "M", "L", "XL", "XXL"];
+
+function formatDate(isoDateString) {
+    // Tạo một đối tượng Date từ chuỗi ngày giờ
+    var date = new Date(isoDateString);
+
+    // Lấy ngày, tháng, năm từ đối tượng Date
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1; // Tháng bắt đầu từ 0
+    var day = date.getDate();
+
+    // Tạo định dạng ngày tháng năm
+    var formattedDate = day + "/" + month + "/" + year;
+
+    return formattedDate;
+}
 
 export default function ProductDetail() {
 
     const product = JSON.parse(localStorage.getItem("choose_product")) || {};
+    const account = useSelector(state => state.account.data) || {};
+    const [reviews, setReviews] = useState([]);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [showOverview, setShowOverview] = useState(false);
     const [showMaterial, setShowMaterial] = useState(false);
@@ -63,6 +85,12 @@ export default function ProductDetail() {
 
     const handleAddToCart = async () => {
         // console.log("add to cart", selectVariation, quantity);
+
+        if (!selectVariation.id) {
+            message.error("Product not sell")
+            return
+        }
+
         const userLogin = JSON.parse(localStorage.getItem("user_login")) || null;
         if (!userLogin) {
             messageApi.open({
@@ -70,12 +98,48 @@ export default function ProductDetail() {
                 content: 'Not logged in!',
             });
         } else {
-            messageApi.open({
-                type: 'success',
-                content: 'Ready to buy!',
-            });
+            // messageApi.open({
+            //     type: 'success',
+            //     content: 'Ready to buy!',
+            // });
+            const data = { account_id: account?.id, quantity, variation_id: selectVariation.id };
+            try {
+                const result = await instanceAxios.post(`/carts/create`, data)
+                console.log("==>> :: ", result);
+                if (result.data.statusCode === 201) {
+                    message.success("Add to cart");
+                    dispatch(getCart(account.id))
+                    // window.location.reload();
+                }
+            } catch (error) {
+                console.log(error);
+                message.error(error.response.data.message)
+            }
         }
     };
+
+    const getReviews = async () => {
+        const result = await instanceAxios.get(`/evaluations/reviews/${product.id}`)
+        if (result.data.statusCode === 200) {
+            setReviews(result.data.data)
+        } else {
+            message.error("Error get reviews");
+        }
+    }
+
+    const handleClickWriteReviews = () => {
+        if (!account.id) {
+            message.error("Login to reviews")
+        } else {
+            navigate('/reviews/new')
+        }
+    }
+
+    useEffect(() => {
+        getReviews()
+    }, [])
+
+    // console.log(reviews);
 
     return (
         <>
@@ -214,33 +278,33 @@ export default function ProductDetail() {
                                 <h1 className="text-[20px] uppercase text-[#1b1b1b] font-bold">
                                     Reviews
                                 </h1>
-                                <Rate allowHalf defaultValue={2.5} /> (12)
+                                <Rate allowHalf disabled defaultValue={parseInt(product.averageRating)} /> ({product.numberRating})
                             </div>
                             <div className="border-b mt-5 mb-9"></div>
-                            <div className="flex justify-between">
+                            {/* <div className="flex justify-between">
                                 <div className="w-[30%]">
                                     <h1 className="text-[20px] mb-4 uppercase font-bold break-words">
                                         CUSTOMER REVIEWS
                                     </h1>
                                     <ul className="flex flex-col gap-5">
                                         <li className="flex items-center gap-2">
-                                            <Rate allowHalf defaultValue={5} />
-                                            <span>(12)</span>
+                                            <Rate allowHalf disabled defaultValue={5} />
+                                            <span>({reviews.filter(item => item.star === 5).length})</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Rate allowHalf defaultValue={4} />
+                                            <Rate allowHalf disabled defaultValue={4} />
                                             <span>(10)</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Rate allowHalf defaultValue={3} />
+                                            <Rate allowHalf disabled defaultValue={3} />
                                             <span>(5)</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Rate allowHalf defaultValue={2} />
+                                            <Rate allowHalf disabled defaultValue={2} />
                                             <span>(1)</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Rate allowHalf defaultValue={0} />
+                                            <Rate allowHalf disabled defaultValue={0} />
                                             <span>(0)</span>
                                         </li>
                                     </ul>
@@ -268,46 +332,42 @@ export default function ProductDetail() {
                                         <div className="size-[14px] rounded-full bg-[#dadada]"></div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="mt-[20px] mb-[20px]">
-                                <Link to="/reviews/new">
-                                    <button className="h-[45px] text-[16px] uppercase font-bold hover:opacity-70 border border-[#7d7d7d] w-[288px] py-2 px-1">
-                                        Write reviews
-                                    </button>
-                                </Link>
+
+                                <button
+                                    className="h-[45px] text-[16px] uppercase font-bold hover:opacity-70 border border-[#7d7d7d] w-[288px] py-2 px-1"
+                                    onClick={() => handleClickWriteReviews()}
+                                >
+                                    Write reviews
+                                </button>
+
                             </div>
                             <div className="border-b"></div>
-                            <div className="my-[20px] font-semibold">13 reviews</div>
+                            <div className="my-[20px] font-semibold">{reviews.length} comments</div>
                             <div className="border-b mb-10"></div>
                             <ul>
-                                <li>
-                                    <div className="flex justify-between items-center mt-7 mb-4">
-                                        <h3 className="uppercase text-[20px] font-bold">
-                                            BEST FIT
-                                        </h3>
-                                        <time className="text-[#7d7d7d] text-[14px]">
-                                            23/03/2023
-                                        </time>
-                                    </div>
-                                    <div className="mb-5">
-                                        <Rate allowHalf defaultValue={5} />
-                                    </div>
-                                    <div className="text-[16px] leading-[24px]">
-                                        <dl className="flex gap-2">
-                                            <dt>Buy size:</dt>
-                                            <dd>M</dd>
-                                        </dl>
-                                        <dl className="flex gap-2">
-                                            <dt>Do the clothes fit:</dt>
-                                            <dd>True to size</dd>
-                                        </dl>
-                                        <dl>
-                                            <dd>
-                                                True to size top.please restock with more colours.
-                                            </dd>
-                                        </dl>
-                                    </div>
-                                    {/* <div className="mt-4 flex gap-4 items-center mb-7">
+                                {reviews
+                                    .slice(0, 4)
+                                    .map(item => (
+                                        <li key={item.id}>
+                                            <div className="flex justify-between items-center mt-7 mb-4">
+                                                <h3 className="uppercase text-[20px] font-bold">
+                                                    {item.account.name}
+                                                </h3>
+                                                <time className="text-[#7d7d7d] text-[14px]">
+                                                    {formatDate(item.createdAt)}
+                                                </time>
+                                            </div>
+                                            {/* <div className="mb-5">
+                                            <Rate allowHalf defaultValue={5} />
+                                        </div> */}
+                                            <div className="text-[16px] leading-[24px]">
+                                                <dl className="flex gap-2">
+                                                    {item.content}
+                                                </dl>
+                                            </div>
+                                            {/* <div className="mt-4 flex gap-4 items-center mb-7">
                                         <strong className="uppercase text-[14px] font-semibold">
                                             broccoli
                                         </strong>
@@ -316,7 +376,8 @@ export default function ProductDetail() {
                                             Singapore
                                         </span>
                                     </div> */}
-                                </li>
+                                        </li>
+                                    ))}
                                 <div className="border-b"></div>
 
                                 <div className="mt-[40px] mb-[20px]">
@@ -333,7 +394,7 @@ export default function ProductDetail() {
                         <h1 className="text-[45px] text-[#1b1b1b] font-bold">
                             {product.name}
                         </h1>
-                        <div className="pb-[50px] text-[42px] font-bold">$ {product.price}</div>
+                        <div className="pb-[50px] text-[42px] font-bold">$ {(product.price * (100 - product.discountPercentage) / 100).toFixed(2)}</div>
                         <p>
                             A combination of comfort and warmth in neck design.
                         </p>

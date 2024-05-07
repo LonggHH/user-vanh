@@ -22,13 +22,15 @@ import Reviews from "./pages/client/review";
 import CreateReview from "./pages/client/review/CreateReview";
 import ReviewIndex from "./pages/client/review";
 import ListReview from "./pages/client/review/ListReview";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "./redux/slices/category";
 import { getBrands } from "./redux/slices/brand";
 import { getProducts } from "./redux/slices/products";
+import { getCart } from "./redux/slices/cart";
 
 export default function App() {
     const location = useLocation();
+    const account = useSelector(state => state.account.data);
 
     const dispatch = useDispatch();
 
@@ -43,6 +45,7 @@ export default function App() {
         dispatch(getCategories())
         dispatch(getBrands())
         dispatch(getProducts())
+        dispatch(getCart(account?.id))
     }, [])
 
     return (

@@ -14,15 +14,15 @@ export default function Member() {
               title: <Link>Uniqlo</Link>,
             },
             {
-              title: <Link>Tư cách thành viên</Link>,
+              title: <Link>Membership status</Link>,
             },
             {
-              title: <span>Hồ sơ</span>,
+              title: <span>Profile</span>,
             },
           ]}
         />
         <h2 className="text-[34px] font-bold uppercase mb-[52px]">
-          Tư cách thành viên
+          Membership status
         </h2>
         <div className="flex">
           <MemberMenu />

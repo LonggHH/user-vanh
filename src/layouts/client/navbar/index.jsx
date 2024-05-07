@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Input, Dropdown } from "antd";
 import { CloseSharp, SearchOutlined, Spa } from "@mui/icons-material";
 import ModalMain from "../../../components/modal/ModalMain";
-import { Tooltip } from "antd";
+import { Tooltip, Badge } from "antd";
 import Categories from "../../../components/categories";
 import "./index.css";
 import { useSelector } from "react-redux";
@@ -23,6 +23,7 @@ export default function Navbar() {
     const isLogin = useSelector(state => state.account.data);
 
     const categories = useSelector(state => state.category.data);
+    const cart = useSelector(state => state.cart.data);
     /**
      * Kiểm tra đăng nhập và chuyển hướng
      */
@@ -53,27 +54,27 @@ export default function Navbar() {
     const items = [
         {
             key: "1",
-            label: <Link to="/member">Hồ sơ</Link>,
+            label: <Link to="/member">Account</Link>,
         },
-        {
-            key: "2",
-            label: <Link to="/member/coupon-wallet">Phiếu giảm giá</Link>,
-        },
-        {
-            key: "3",
-            label: <Link to="/member/purchase/history">Lịch sử mua hàng</Link>,
-        },
+        // {
+        //     key: "2",
+        //     label: <Link to="/member/coupon-wallet">Phiếu giảm giá</Link>,
+        // },
+        // {
+        //     key: "3",
+        //     label: <Link to="/member/purchase/history">Lịch sử mua hàng</Link>,
+        // },
         {
             key: "4",
-            label: <Link to="/member/orders">Lịch sử đơn hàng</Link>,
+            label: <Link to="/member/orders">Orders</Link>,
         },
         {
             key: "6",
-            label: <Link to="/wishlist">Yêu thích</Link>,
+            label: <Link to="/wishlist">Wishlist</Link>,
         },
         {
             key: "7",
-            label: <span onClick={() => setShowModalLogout(true)}>Đăng xuất</span>,
+            label: <span onClick={() => setShowModalLogout(true)}>Logout</span>,
         },
     ];
 
@@ -82,8 +83,8 @@ export default function Navbar() {
             {showModalLogin && <ModalMain close={handleCloseModal} />}
             {showModalLogout && (
                 <ModalMain
-                    title="Xác nhận đăng xuất"
-                    content="Bạn có chắc chắn muốn đăng xuất tài khoản."
+                    title="Confirm Logout"
+                    content="Are you sure you want to log out."
                     close={handleCloseModal}
                 />
             )}
@@ -131,7 +132,7 @@ export default function Navbar() {
                                 </ul>
                             </div>
                             <div className="flex items-center gap-8">
-                                <Tooltip title="Tìm kiếm">
+                                <Tooltip title="Search">
                                     <SearchIcon
                                         onClick={() => setShowInput(true)}
                                         className="cursor-pointer text-[24px]"
@@ -145,47 +146,24 @@ export default function Navbar() {
                                                 items,
                                             }}
                                         >
-                                            <a onClick={(e) => e.preventDefault()}>
-                                                <PersonIcon className="cursor-pointer text-[24px]" />
-                                            </a>
+
+                                            <Badge dot>
+                                                <a onClick={(e) => e.preventDefault()}>
+                                                    <PersonIcon className="cursor-pointer text-[24px]" />
+                                                </a>
+                                            </Badge>
                                         </Dropdown>
-                                        {/* <div className="relative" id="info-container">
-                      <PersonIcon className="cursor-pointer text-[24px]" />
-                      <div
-                        id="option-info"
-                        className="absolute top-[49px] right-0 border bg-white py-4 w-[180px] shadow-md flex flex-col"
-                      >
-                        <Link className="py-1 px-4 hover:bg-[#dadada] hover:text-blue-950">
-                          Hồ sơ
-                        </Link>
-                        <Link className="py-1 px-4 hover:bg-[#dadada] hover:text-blue-950">
-                          Phiếu giảm giá
-                        </Link>
-                        <Link className="py-1 px-4 hover:bg-[#dadada] hover:text-blue-950">
-                          Lịch sử mua hàng
-                        </Link>
-                        <Link className="py-1 px-4 hover:bg-[#dadada] hover:text-blue-950">
-                          Lích sử đơn hàng
-                        </Link>
-                        <Link className="py-1 px-4 hover:bg-[#dadada] hover:text-blue-950">
-                          Yêu thích
-                        </Link>
-                        <Link className="py-1 px-4 hover:bg-[#dadada] hover:text-blue-950">
-                          Đăng xuất
-                        </Link>
-                      </div>
-                    </div> */}
                                     </>
                                 ) : (
                                     <>
-                                        <Tooltip title="Đăng nhập">
+                                        <Tooltip title="Login">
                                             <Link to="/login">
                                                 <PersonIcon className="cursor-pointer text-[24px]" />
                                             </Link>
                                         </Tooltip>
                                     </>
                                 )}
-                                <Tooltip title="Sản phẩm ưu thích">
+                                <Tooltip title="Wishlist">
                                     <div onClick={handleRedirect} className="relative">
                                         <FavoriteBorderIcon className="cursor-pointer text-[24px]" />
                                         <span className="absolute px-2 py-0 rounded-full top-[-3px] right-[-18px] text-[10px] bg-[#EB3333] text-white font-semibold">
@@ -193,11 +171,11 @@ export default function Navbar() {
                                         </span>
                                     </div>
                                 </Tooltip>
-                                <Tooltip title="Giỏ hàng">
+                                <Tooltip title="Cart">
                                     <Link to="/cart" className="relative">
                                         <ShoppingCartIcon className="cursor-pointer text-[24px]" />
                                         <span className="absolute px-2 py-0 rounded-full top-[-3px] right-[-18px] text-[10px] bg-[#EB3333] text-white font-semibold">
-                                            0
+                                            {cart.length}
                                         </span>
                                     </Link>
                                 </Tooltip>

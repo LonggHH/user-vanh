@@ -14,6 +14,9 @@ const accountSlice = createSlice({
     reducers: {
         saveAccount(state, action) {
             state.data = action.payload;
+        },
+        saveNewDataAcocunt(state, action) {
+            state.data = { ...state.data, ...action.payload }
         }
     },
     extraReducers: (builder) => {
@@ -23,5 +26,5 @@ const accountSlice = createSlice({
     }
 });
 
-export const { saveAccount } = accountSlice.actions;
+export const { saveAccount, saveNewDataAcocunt } = accountSlice.actions;
 export default accountSlice.reducer;
