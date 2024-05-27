@@ -290,8 +290,7 @@ export default function CreateReview() {
                             </h3>
                             <ul className="ml-[28px]">
                                 <li className="list-disc">
-                                    Your posted comment may be used for Quang's purposes
-                                    fox.
+                                    Your posted comment may be used.
                                 </li>
                                 <li className="list-disc">
                                     We do not accept advertising requirements for the

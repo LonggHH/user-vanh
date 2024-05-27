@@ -22,6 +22,7 @@ function formatDate(isoDateString) {
 export default function ListReview() {
 
     const product = JSON.parse(localStorage.getItem("choose_product")) || {}
+    const userLogin = JSON.parse(localStorage.getItem("user_login")) || {}
 
     const [reviews, setReviews] = useState([]);
     const [stars, setStars] = useState([]);
@@ -48,8 +49,14 @@ export default function ListReview() {
         getStars()
     }, [])
 
-    console.log(reviews);
-    console.log(stars);
+    // console.log(reviews);
+    const starFind = stars.find(el => el.account.id === userLogin.id) || { star: 5 };
+    const averageStar = stars.reduce((total, item) => {
+        return total += item.star
+    }, 0) / stars.length;
+
+    // console.log("trung binh: ", averageStar);
+    // console.log(starFind);
 
     return (
         <>
@@ -76,7 +83,7 @@ export default function ListReview() {
                         <div className="flex justify-between items-center mb-[40px]">
                             <h3 className="text-[32px] uppercase font-bold">Reviews</h3>
                             <div className="flex items-center gap-2">
-                                <Rating name="half-rating" defaultValue={parseInt(product.averageRating)} disabled />
+                                <Rating name="half-rating" value={parseInt(averageStar)} disabled />
                                 <span> ({stars.length})</span>
                             </div>
                         </div>
@@ -92,7 +99,7 @@ export default function ListReview() {
                                             <time className="text-[#7d7d7d] text-[14px]">{formatDate(item.createdAt)}</time>
                                         </div>
                                         <div className="mb-5">
-                                            <Rating name="half-rating" defaultValue={4} disabled />
+                                            <Rating name="half-rating" value={starFind.star} disabled />
                                         </div>
                                         <div className="text-[16px] leading-[24px]">
                                             <dl className="flex gap-2">
@@ -100,12 +107,12 @@ export default function ListReview() {
                                             </dl>
                                         </div>
                                         {/* <div className="mt-4 flex gap-4 items-center mb-7">
-                                            <strong className="uppercase text-[14px] font-semibold">
-                                                broccoli
-                                            </strong>
-                                            <span className="text-[14px] text-[#7d7d7d]">Nữ</span>
-                                            <span className="text-[14px] text-[#7d7d7d]">Singapore</span>
-                                        </div> */}
+                                                <strong className="uppercase text-[14px] font-semibold">
+                                                    broccoli
+                                                </strong>
+                                                <span className="text-[14px] text-[#7d7d7d]">Nữ</span>
+                                                <span className="text-[14px] text-[#7d7d7d]">Singapore</span>
+                                            </div> */}
                                     </li>
                                     <div className="border-b"></div>
                                 </div>

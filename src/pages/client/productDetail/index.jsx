@@ -17,6 +17,7 @@ import "swiper/css/pagination";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { Navigation } from "swiper/modules";
+import axios from "axios";
 
 const SIZE = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -41,6 +42,7 @@ export default function ProductDetail() {
 
     const product = JSON.parse(localStorage.getItem("choose_product")) || {};
     const account = useSelector(state => state.account.data) || {};
+    const products = useSelector(state => state.product.data) || [];
     const [reviews, setReviews] = useState([]);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -62,6 +64,8 @@ export default function ProductDetail() {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const [messageApi, contextHolder] = message.useMessage();
+
+    const [recommendProduct, setRecommendProduct] = useState([])
 
     const handleNextImage = () => {
         setCurrentIndex((prevIndex) =>
@@ -144,8 +148,21 @@ export default function ProductDetail() {
         }
     }
 
+    const getRecommendProduct = async () => {
+        try {
+            const result = await axios.get(`http://localhost:3006/recommend/${product.id}`)
+            if (result.data.statusCode === 200) {
+                console.log("reuslt:: ", result.data.data);
+                setRecommendProduct(result.data.data)
+            }
+        } catch (error) {
+            console.log("==>> :: ", error);
+        }
+    }
+
     useEffect(() => {
         getReviews()
+        getRecommendProduct()
     }, [])
 
     // console.log(reviews);
@@ -526,7 +543,7 @@ export default function ProductDetail() {
 
                 <section className="mt-[50px]">
                     <h1 className="font-semibold text-[34px] uppercase">
-                        Sản phẩm gợi ý
+                        Product suggested
                     </h1>
                     <main className="mt-6 mb-[88px]">
                         <div className="w-full">
@@ -537,52 +554,68 @@ export default function ProductDetail() {
                                 modules={[Navigation]}
                                 className="w-full mySwiper"
                             >
-                                <SwiperSlide>
-                                    <div className="relative">
-                                        {isTym ? (
-                                            <>
-                                                <FavoriteIcon
-                                                    onClick={() => setIsTym(false)}
-                                                    className="absolute right-[10px] top-[10px] cursor-pointer text-[#f00]"
-                                                />
-                                            </>
-                                        ) : (
-                                            <>
-                                                <FavoriteBorderIcon
-                                                    onClick={() => setIsTym(true)}
-                                                    className="absolute right-[10px] top-[10px] cursor-pointer text-[#f00]"
-                                                />
-                                            </>
-                                        )}
-                                        <img
-                                            className="min-w-full max-w-full min-h-[293px] max-h-[293px] object-cover"
-                                            src="https://image.uniqlo.com/UQ/ST3/vn/imagesgoods/465763/item/vngoods_03_465763.jpg?width=320"
-                                            alt=""
-                                        />
-                                        <div className="mt-[10px] flex gap-2 items-center mb-[10px]">
-                                            <div className="w-4 h-4 bg-red-500"></div>
-                                            <div className="w-4 h-4 bg-red-500"></div>
-                                            <div className="w-4 h-4 bg-red-500"></div>
-                                            <div className="w-4 h-4 bg-red-500"></div>
-                                            <div className="w-4 h-4 bg-red-500"></div>
-                                            <div className="w-4 h-4 bg-red-500"></div>
-                                        </div>
-                                        <div className="flex justify-between items-center text-[13px] text-[#ababab] uppercase font-semibold my-4">
-                                            <span>Nữ</span>
-                                            <span>XS-XXL</span>
-                                        </div>
-                                        <h1 className="text-[20px] uppercase font-bold text-left mb-[10px]">
-                                            Áo ba lỗ vải gân mềm
-                                        </h1>
-                                        <p className="uppercase text-[16px] text-left font-bold mb-[10px]">
-                                            244.000 VND
-                                        </p>
-                                        <p className="text-left flex items-center gap-3">
-                                            <Rate allowHalf defaultValue={5} />{" "}
-                                            <span className="text-[14px]">(100 đánh giá)</span>
-                                        </p>
-                                    </div>
-                                </SwiperSlide>
+                                {
+                                    recommendProduct.map((item) => {
+                                        const product = products.find(el => el.id === item.product_id)
+                                        return (
+                                            <SwiperSlide key={item.product_id}>
+                                                <div className="relative">
+                                                    {/* {isTym ? (
+                                                        <>
+                                                            <FavoriteIcon
+                                                                onClick={() => setIsTym(false)}
+                                                                className="absolute right-[10px] top-[10px] cursor-pointer text-[#f00]"
+                                                            />
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <FavoriteBorderIcon
+                                                                onClick={() => setIsTym(true)}
+                                                                className="absolute right-[10px] top-[10px] cursor-pointer text-[#f00]"
+                                                            />
+                                                        </>
+                                                    )} */}
+                                                    <img
+                                                        className="min-w-full max-w-full min-h-[293px] max-h-[293px] object-cover"
+                                                        src={product.defaultImage}
+                                                        alt=""
+                                                    />
+                                                    <div className="my-[20px]" style={{ display: "flex", gap: 4 }}>
+                                                        {product.variations.map((variation) => (
+                                                            <div key={variation.id} className="h-4 w-4 text-[#ababab]"
+                                                                style={{ backgroundColor: `${variation.color}`, border: "1px solid #999" }}
+                                                            ></div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="text-[14px] uppercase mb-5 text-[#ababab] font-bold flex justify-between items-center" >
+                                                        <span className="">{product.category.name}</span>
+                                                        {/* <p>5Y(110)-14Y(160)</p> */}
+                                                    </div>
+                                                    <h1 className="text-[20px] uppercase font-bold text-left mb-[10px]" style={{ minHeight: 92 }}>
+                                                        {product.name}
+                                                    </h1>
+                                                    <p className="text-[#7d7d7d] mb-1" style={{ textAlign: "left" }}>{product.brand.name}</p>
+                                                    {product.discountPercentage == 0 ?
+                                                        <p className="text-[#8c8b8b] uppercase font-bold text-[22px]" style={{ textAlign: "left" }}>
+                                                            ${product.price}
+                                                        </p>
+                                                        :
+                                                        <p className="text-[#8c8b8b] uppercase font-bold text-[22px] text-red-500" style={{ opacity: 1 }}>
+                                                            ${(product.price * (100 - product.discountPercentage) / 100).toFixed(2)}
+                                                            <span style={{ fontSize: 14 }}> (sale) </span>
+                                                        </p>
+                                                    }
+                                                    <p style={{ textAlign: "left" }}>
+                                                        <Rate allowHalf disabled defaultValue={parseInt(product.averageRating)}
+                                                            style={{ fontSize: 16 }}
+                                                        />
+                                                        {" "}({product.numberRating})
+                                                    </p>
+                                                </div>
+                                            </SwiperSlide>
+                                        )
+                                    })
+                                }
                             </Swiper>
                         </div>
                     </main>

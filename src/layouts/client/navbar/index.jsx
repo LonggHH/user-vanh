@@ -23,8 +23,11 @@ export default function Navbar() {
     const isLogin = useSelector(state => state.account.data);
 
     const categories = useSelector(state => state.category.data);
+    const products = useSelector(state => state.product.data);
     const cart = useSelector(state => state.cart.data);
     const wishlist = useSelector(state => state.wishlist.data)
+
+    const [productSearch, setProductSearch] = useState([]);
     /**
      * Kiểm tra đăng nhập và chuyển hướng
      */
@@ -79,6 +82,21 @@ export default function Navbar() {
         },
     ];
 
+    const changeTextSearch = (textSearch) => {
+        if (!textSearch) {
+            setProductSearch([])
+        } else {
+            let productFilter = products.filter(el => el.name.toLowerCase().includes(textSearch.toLowerCase()))
+            productFilter = productFilter.splice(0, 6)
+            setProductSearch(productFilter)
+        }
+    }
+
+    const handleClickProduct = (product) => {
+        localStorage.setItem("choose_product", JSON.stringify(product));
+        navigate('/product-detail')
+    }
+
     return (
         <>
             {showModalLogin && <ModalMain close={handleCloseModal} />}
@@ -92,21 +110,55 @@ export default function Navbar() {
             <nav className="sticky top-0 z-40 w-full h-[72px] bg-white py-0 border-b border-solid border-b-[rgb(204, 204, 204)]">
                 {showInput ? (
                     <>
-                        <div className="absolute h-full w-full gap-3 flex items-center justify-center">
+                        <div className="absolute h-full w-full gap-3 flex items-center justify-center relative">
                             <div className="flex w-[50%] items-center">
                                 <Input
                                     className="h-[40px] rounded-r-none"
-                                    placeholder="Tìm kiếm theo từ khóa"
+                                    placeholder="Search by keyword"
+                                    onChange={(e) => changeTextSearch(e.target.value)}
                                 />
-                                <Tooltip title="Tìm kiếm">
+                                <Tooltip title="Search">
                                     <div className="h-10 flex items-center border px-2 bg-black rounded-r-[4px] text-white">
                                         <SearchOutlined className="cursor-pointer" />
                                     </div>
                                 </Tooltip>
                             </div>
-                            <Tooltip onClick={() => setShowInput(false)} title="Đóng">
+                            <Tooltip onClick={() => { setShowInput(false), setProductSearch([]) }} title="Close">
                                 <CloseSharp className="cursor-pointer hover:text-gray-800" />
                             </Tooltip>
+
+                            {/* code them */}
+                            <div className="recommend-search">
+                                {productSearch.map((product) => (
+                                    <div key={product.id} style={{ display: "flex", alignItems: "center", margin: "4px 0", justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', gap: 12, alignItems: "center" }}>
+                                            <div>
+                                                <img width={50} src={product.defaultImage} alt="" />
+                                            </div>
+                                            <div className="text-[14px] uppercase  text-[#ababab] font-bold flex justify-between items-center" >
+                                                <span className="">{product.category.name}</span>
+                                                {/* <p>5Y(110)-14Y(160)</p> */}
+                                            </div>
+                                            <p className="text-[#7d7d7d] ">{product.brand.name}</p>
+                                            <h2 className="text-[14px] uppercase  text-[#ababab] font-bold" style={{ cursor: "pointer" }}
+                                                onClick={() => handleClickProduct(product)}
+                                            >
+                                                {product.name}
+                                            </h2>
+                                        </div>
+                                        {product.discountPercentage == 0 ?
+                                            <span className="text-[#8c8b8b] uppercase font-bold text-[22px]" style={{ textAlign: "left" }}>
+                                                ${product.price}
+                                            </span>
+                                            :
+                                            <span className="text-[#8c8b8b] uppercase font-bold text-[22px] text-red-500" style={{ opacity: 1 }}>
+                                                ${(product.price * (100 - product.discountPercentage) / 100).toFixed(2)}
+                                                <span style={{ fontSize: 14 }}> (sale) </span>
+                                            </span>
+                                        }
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </>
                 ) : (

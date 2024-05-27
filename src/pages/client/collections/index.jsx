@@ -278,11 +278,11 @@ export default function Collection() {
                                     </h2>
                                     <p className="text-[#7d7d7d] mb-1">{product.brand.name}</p>
                                     {product.discountPercentage == 0 ?
-                                        <span className="text-[#8c8b8b] uppercase font-bold text-[22px]">
+                                        <span className="text-[#8c8b8b] uppercase font-bold text-[22px]" style={{ textAlign: "left" }}>
                                             ${product.price}
                                         </span>
                                         :
-                                        <span className="text-[#8c8b8b] uppercase font-bold text-[22px] text-red-500">
+                                        <span className="text-[#8c8b8b] uppercase font-bold text-[22px] text-red-500" style={{ opacity: 1 }}>
                                             ${(product.price * (100 - product.discountPercentage) / 100).toFixed(2)}
                                             <span style={{ fontSize: 14 }}> (sale) </span>
                                         </span>

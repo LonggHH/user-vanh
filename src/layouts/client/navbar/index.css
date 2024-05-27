@@ -15,3 +15,15 @@
 .brand-select:hover {
     color: #f00;
 }
+
+.recommend-search {
+    width: 800px;
+    /* height: 300px; */
+    position: absolute;
+    top: 100%;
+    left: calc(50% - 400px);
+    background-color: #cfd4de;
+    align-self: center;
+    padding: 8px;
+    border-radius: 4px;
+}
