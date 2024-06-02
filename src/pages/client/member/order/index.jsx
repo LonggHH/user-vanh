@@ -152,7 +152,10 @@ export default function Order() {
                                                         {/* <span style={{ fontWeight: 100, fontSize: 14, color: `${item.pay ? "green" : "black"}` }}>{item.status}</span> */}
                                                         <button type="button"
                                                             onClick={() => handleDeny(item.id)}
-                                                            style={{ cursor: "pointer", padding: 0, border: "1px solid #333" }}
+                                                            style={{
+                                                                cursor: "pointer", padding: 0, border: `1px solid ${item.pay ? "red" : "#333"}`,
+                                                                color: `${item.pay ? "red" : ""}`
+                                                            }}
                                                         >
                                                             Deny
                                                         </button>

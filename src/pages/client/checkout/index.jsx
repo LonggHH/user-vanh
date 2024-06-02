@@ -6,6 +6,8 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { useDispatch, useSelector } from "react-redux";
 import instanceAxios from "../../../configs/axios";
 import { getCart } from "../../../redux/slices/cart";
+import { useRef, useState } from "react";
+import { PayPalButton } from "react-paypal-button-v2";
 
 export default function Checkout() {
 
@@ -14,6 +16,33 @@ export default function Checkout() {
     const account = useSelector(state => state.account.data);
     const cart = useSelector(state => state.cart.data);
     const total = JSON.parse(localStorage.getItem("total_orders")) || 0;
+    const formRef = useRef(null);
+    const [pay, setPay] = useState(true);
+
+
+    const handlePaypalOrder = async () => {
+        const formData = new FormData(formRef.current);
+        const values = {};
+        for (let [name, value] of formData.entries()) {
+            values[name] = value;
+        }
+
+        const data = { ...values, account_id: account.id, total, pay };
+
+        try {
+            const result = await instanceAxios.post(`/orders/create`, data)
+            console.log(result);
+            if (result.data.statusCode === 200) {
+                message.success(result.data.message);
+                localStorage.removeItem("total_orders")
+                dispatch(getCart(account.id))
+                e.target.reset();
+            }
+        } catch (error) {
+            console.log(error);
+            message.error(error.response.data.message)
+        }
+    }
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -23,7 +52,7 @@ export default function Checkout() {
             values[name] = value;
         }
 
-        const data = { ...values, account_id: account.id, total, pay: false };
+        const data = { ...values, account_id: account.id, total, pay };
 
         try {
             const result = await instanceAxios.post(`/orders/create`, data)
@@ -83,6 +112,7 @@ export default function Checkout() {
                                         <div className="flex items-center gap-2 mb-2">
                                             <Radio
                                                 id="address"
+                                                
                                                 type="radio"
                                                 className="h-[20px] w-[20px]"
                                             />
@@ -108,6 +138,7 @@ export default function Checkout() {
                                         <div className="flex items-center gap-2 mb-2">
                                             <Radio
                                                 id="address"
+                                                
                                                 type="radio"
                                                 className="h-[20px] w-[20px]"
                                             />
@@ -129,7 +160,7 @@ export default function Checkout() {
                                         </div>
                                     </div> */}
                                     {/* <div className="border-b my-7"></div> */}
-                                    <form className="flex flex-col gap-7" onSubmit={onSubmit}>
+                                    <form className="flex flex-col gap-7" onSubmit={onSubmit} ref={formRef}>
                                         <h1 className="text-[34px] uppercase text-[#757575] font-bold mb-5">
                                             Purchasing information
                                         </h1>
@@ -144,6 +175,7 @@ export default function Checkout() {
                                                 <input
                                                     name="name"
                                                     id="name"
+
                                                     type="text"
                                                     className="login-input border-2 w-full"
                                                     defaultValue={account.name}
@@ -164,6 +196,7 @@ export default function Checkout() {
                                                 <input
                                                     name="phone"
                                                     id="phone"
+
                                                     type="text"
                                                     className="login-input border-2 w-full"
                                                     defaultValue={account.phone}
@@ -181,6 +214,7 @@ export default function Checkout() {
                                                 <input
                                                     name="email"
                                                     id="email"
+
                                                     type="text"
                                                     className="login-input border-2 w-full"
                                                     defaultValue={account.email}
@@ -198,6 +232,7 @@ export default function Checkout() {
                                                 <input
                                                     name="address"
                                                     id="address"
+
                                                     type="text"
                                                     className="login-input border-2 w-full"
                                                 />
@@ -216,6 +251,7 @@ export default function Checkout() {
                                                     cols="30"
                                                     rows="4"
                                                     id="note"
+
                                                     type="note"
                                                     className="login-input border-2 w-full"
                                                 ></textarea>
@@ -230,15 +266,63 @@ export default function Checkout() {
                                         </p>
                                         <div className="text-right text-[#378694]">Required *</div>
                                         {/* <div className="flex items-center gap-2">
-                                            <input id="confirm" type="checkbox" className="h-5 w-5" />
+                                            <input id="confirm" 
+                                            type="checkbox" className="h-5 w-5" />
                                             <label htmlFor="confirm">
                                                 Dùng làm địa chỉ thanh toán
                                             </label>
                                             <ErrorIcon className="text-[#ababab]" />
                                         </div> */}
-                                        <button type="submit" className="uppercase bg-[#1b1b1b] text-white py-2 px-1 w-[40%]">
-                                            Order
-                                        </button>
+
+                                        <div style={{ display: "flex", gap: 12 }}>
+                                            <button
+                                                style={{
+                                                    padding: "0 5px", border: '1px solid #333', minWidth: '60px',
+                                                    boxShadow: `${pay ? "1px 1px 1px 1px #333" : ""}`
+                                                }}
+                                                type="button" onClick={() => setPay(true)}
+                                            >
+                                                Pay
+                                            </button>
+                                            <button
+                                                style={{
+                                                    padding: "0 5px", border: '1px solid #333', minWidth: '60px',
+                                                    boxShadow: `${!pay ? "1px 1px 1px 1px #333" : ""}`
+                                                }}
+                                                type="button" onClick={() => setPay(false)}
+                                            >
+                                                Order
+                                            </button>
+                                        </div>
+
+                                        {
+                                            pay ?
+                                                <PayPalButton
+                                                    amount={total}
+                                                    // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
+                                                    onSuccess={(details, data) => {
+
+                                                        handlePaypalOrder();
+                                                        // OPTIONAL: Call your server to save the transaction
+                                                        // return fetch("/paypal-transaction-complete", {
+                                                        //     method: "post",
+                                                        //     body: JSON.stringify({
+                                                        //         orderID: data.orderID
+                                                        //     })
+                                                        // });
+                                                    }}
+
+                                                    onError={(error) => {
+                                                        console.log(error);
+                                                    }}
+                                                />
+                                                : <button
+                                                    type="submit" className="uppercase bg-[#1b1b1b] text-white py-2 px-1 w-[40%]">
+                                                    Order
+                                                </button>
+                                        }
+
+
                                     </form>
                                 </div>
                             </div>
