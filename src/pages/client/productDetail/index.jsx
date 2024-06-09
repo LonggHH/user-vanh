@@ -131,6 +131,12 @@ export default function ProductDetail() {
         }
     };
 
+    const handleClickProduct = (product) => {
+        localStorage.setItem("choose_product", JSON.stringify(product));
+        getRecommendProduct(product.id)
+        navigate('/product-detail')
+    }
+
     const getReviews = async () => {
         const result = await instanceAxios.get(`/evaluations/reviews/${product.id}`)
         if (result.data.statusCode === 200) {
@@ -556,9 +562,9 @@ export default function ProductDetail() {
                             >
                                 {
                                     recommendProduct.map((item) => {
-                                        const product = products.find(el => el.id === item.product_id)
+                                        const product = products.find(el => el.id === item.id)
                                         return (
-                                            <SwiperSlide key={item.product_id}>
+                                            <SwiperSlide key={item.id}>
                                                 <div className="relative">
                                                     {/* {isTym ? (
                                                         <>
@@ -577,7 +583,7 @@ export default function ProductDetail() {
                                                     )} */}
                                                     <img
                                                         className="min-w-full max-w-full min-h-[293px] max-h-[293px] object-cover"
-                                                        src={product.defaultImage}
+                                                        src={product?.defaultImage}
                                                         alt=""
                                                     />
                                                     <div className="my-[20px]" style={{ display: "flex", gap: 4 }}>
@@ -591,7 +597,9 @@ export default function ProductDetail() {
                                                         <span className="">{product.category.name}</span>
                                                         {/* <p>5Y(110)-14Y(160)</p> */}
                                                     </div>
-                                                    <h1 className="text-[20px] uppercase font-bold text-left mb-[10px]" style={{ minHeight: 92 }}>
+                                                    <h1 className="text-[20px] uppercase font-bold text-left mb-[10px]" style={{ minHeight: 92 }}
+                                                        onClick={() => handleClickProduct(product)}
+                                                    >
                                                         {product.name}
                                                     </h1>
                                                     <p className="text-[#7d7d7d] mb-1" style={{ textAlign: "left" }}>{product.brand.name}</p>

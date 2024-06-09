@@ -18,6 +18,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useDispatch, useSelector } from "react-redux";
 import instanceAxios from "../../../configs/axios";
 import { getCart } from "../../../redux/slices/cart"
+import axios from "axios";
 
 
 function checkNewProduct(dateString) {
@@ -51,6 +52,9 @@ export default function Cart() {
     const navigate = useNavigate()
     const cart = useSelector(state => state.cart.data);
     const account = useSelector(state => state.account.data)
+    const products = useSelector(state => state.product.data) || [];
+
+    const [itemYourLike, setItemYourLike] = useState([])
     // console.log(cart);
 
     const [showResult, setShowResult] = useState(false);
@@ -91,12 +95,31 @@ export default function Cart() {
         }
     }
 
+    const getItemYourLike = async () => {
+        try {
+            const result = await axios.get(`http://localhost:3006/svdrecommend/${account.id}`)
+            if (result.data.statusCode === 200) {
+                // console.log("reuslt recommend cart:: ", result.data.data);
+                setItemYourLike(result.data.data)
+            }
+        } catch (error) {
+            console.log("==>> :: ", error);
+        }
+    }
+
     const total = cart.reduce((total, item) => {
         return total += +(item.variation.product.price * (100 - item.variation.product.discountPercentage) / 100 * item.quantity).toFixed(2)
     }, 0)
 
+    const handleClickProduct = (product) => {
+        localStorage.setItem("choose_product", JSON.stringify(product));
+        navigate('/product-detail')
+    }
+
     useEffect(() => {
         document.title = "Uniqlo | Giỏ hàng";
+
+        getItemYourLike()
     }, []);
     return (
         <>
@@ -121,7 +144,7 @@ export default function Cart() {
                         <section style={{ flex: 2 }}>
                             {cart
                                 .map((item) => (
-                                    <>
+                                    <React.Fragment key={item.id}>
                                         <div className="flex gap-[20px]">
                                             <div className="min-w-[216px] max-w-[216px] min-h-[216px] max-h-[216px]">
                                                 <img
@@ -231,7 +254,7 @@ export default function Cart() {
                                             </div>
                                         </div>
                                         <div className="border-b my-7"></div>
-                                    </>
+                                    </React.Fragment>
                                 ))}
                         </section>
 
@@ -326,6 +349,88 @@ export default function Cart() {
                 {/* <div className="mb-4 text-center cursor-pointer hover:underline hover:text-blue-600">
           Xem thêm
         </div> */}
+
+                <section className="mt-[50px]">
+                    <h1 className="font-semibold text-[34px] uppercase">
+                        ITEMS YOU MAY LIKE
+                    </h1>
+                    <main className="mt-6 mb-[88px]">
+                        <div className="w-full">
+                            <Swiper
+                                slidesPerView={4}
+                                navigation={true}
+                                spaceBetween={30}
+                                modules={[Navigation]}
+                                className="w-full mySwiper"
+                            >
+                                {
+                                    itemYourLike.map((item) => {
+                                        const product = products.find(el => el.id === item.product_id)
+                                        return (
+                                            <SwiperSlide key={item.id}>
+                                                <div className="relative">
+                                                    {/* {isTym ? (
+                                                        <>
+                                                            <FavoriteIcon
+                                                                onClick={() => setIsTym(false)}
+                                                                className="absolute right-[10px] top-[10px] cursor-pointer text-[#f00]"
+                                                            />
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <FavoriteBorderIcon
+                                                                onClick={() => setIsTym(true)}
+                                                                className="absolute right-[10px] top-[10px] cursor-pointer text-[#f00]"
+                                                            />
+                                                        </>
+                                                    )} */}
+                                                    <img
+                                                        className="min-w-full max-w-full min-h-[293px] max-h-[293px] object-cover"
+                                                        src={product?.defaultImage}
+                                                        alt=""
+                                                    />
+                                                    <div className="my-[20px]" style={{ display: "flex", gap: 4 }}>
+                                                        {product.variations.map((variation) => (
+                                                            <div key={variation.id} className="h-4 w-4 text-[#ababab]"
+                                                                style={{ backgroundColor: `${variation.color}`, border: "1px solid #999" }}
+                                                            ></div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="text-[14px] uppercase mb-5 text-[#ababab] font-bold flex justify-between items-center" >
+                                                        <span className="">{product.category.name}</span>
+                                                        {/* <p>5Y(110)-14Y(160)</p> */}
+                                                    </div>
+                                                    <h1 className="text-[20px] uppercase font-bold text-left mb-[10px]" style={{ minHeight: 92 }}
+                                                        onClick={() => handleClickProduct(product)}
+                                                    >
+                                                        {product.name}
+                                                    </h1>
+                                                    <p className="text-[#7d7d7d] mb-1" style={{ textAlign: "left" }}>{product.brand.name}</p>
+                                                    {product.discountPercentage == 0 ?
+                                                        <p className="text-[#8c8b8b] uppercase font-bold text-[22px]" style={{ textAlign: "left" }}>
+                                                            ${product.price}
+                                                        </p>
+                                                        :
+                                                        <p className="text-[#8c8b8b] uppercase font-bold text-[22px] text-red-500" style={{ opacity: 1 }}>
+                                                            ${(product.price * (100 - product.discountPercentage) / 100).toFixed(2)}
+                                                            <span style={{ fontSize: 14 }}> (sale) </span>
+                                                        </p>
+                                                    }
+                                                    <p style={{ textAlign: "left" }}>
+                                                        <Rate allowHalf disabled defaultValue={parseInt(product.averageRating)}
+                                                            style={{ fontSize: 16 }}
+                                                        />
+                                                        {" "}({product.numberRating})
+                                                    </p>
+                                                </div>
+                                            </SwiperSlide>
+                                        )
+                                    })
+                                }
+                            </Swiper>
+                        </div>
+                    </main>
+                </section>
             </main>
         </>
     );

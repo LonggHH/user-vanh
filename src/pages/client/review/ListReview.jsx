@@ -49,14 +49,15 @@ export default function ListReview() {
         getStars()
     }, [])
 
-    // console.log(reviews);
-    const starFind = stars.find(el => el.account.id === userLogin.id) || { star: 5 };
+    // const starFind = stars.find(el => el.account.id === userLogin.id) || { star: 5 };
     const averageStar = stars.reduce((total, item) => {
         return total += item.star
     }, 0) / stars.length;
 
     // console.log("trung binh: ", averageStar);
     // console.log(starFind);
+    console.log(reviews);
+    console.log(stars);
 
     return (
         <>
@@ -91,15 +92,20 @@ export default function ListReview() {
                         <p className="my-[20px] font-semibold">{reviews.length} Comments</p>
                         <div className="border-b"></div>
                         <ul style={{ height: 700, overflowY: "scroll" }}>
-                            {reviews.map((item) => (
-                                <div>
+                            {reviews.map((item, i) => (
+                                <div key={i}>
                                     <li>
                                         <div className="flex justify-between items-center mt-7 mb-4">
                                             <h3 className="uppercase text-[20px] font-bold">{item.account.name}</h3>
                                             <time className="text-[#7d7d7d] text-[14px]">{formatDate(item.createdAt)}</time>
                                         </div>
                                         <div className="mb-5">
-                                            <Rating name="half-rating" value={starFind.star} disabled />
+                                            {/* o day */}
+                                            {/* <Rating
+                                                name="half-rating"
+                                                disabled
+                                                value={starFind.star}
+                                            /> */}
                                         </div>
                                         <div className="text-[16px] leading-[24px]">
                                             <dl className="flex gap-2">
@@ -170,6 +176,26 @@ export default function ListReview() {
                                     Write reviews
                                 </button>
                             </Link>
+                        </div>
+
+                        <hr />
+
+                        <div className="flex flex-col gap-5" style={{ height: 350, overflowY: "scroll" }}>
+                            {
+                                stars.map((star, i) => (
+                                    <div key={i}>
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="uppercase text-[20px] font-bold">{star.account.name}</h3>
+                                            <Rating
+                                                name="half-rating"
+                                                disabled
+                                                value={star.star}
+                                            />
+                                        </div>
+                                        <div className="border-b"></div>
+                                    </div>
+                                ))
+                            }
                         </div>
                     </article>
                 </div>
