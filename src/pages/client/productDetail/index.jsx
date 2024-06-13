@@ -161,7 +161,7 @@ export default function ProductDetail() {
         try {
             const result = await axios.get(`http://localhost:3006/recommend/${product.id}`)
             if (result.data.statusCode === 200) {
-                console.log("reuslt:: ", result.data.data);
+                console.log("san pham recommend :: ", result);
                 setRecommendProduct(result.data.data)
             }
         } catch (error) {
@@ -184,7 +184,7 @@ export default function ProductDetail() {
     useEffect(() => {
         getReviews()
         getRatingProduct()
-        // getRecommendProduct()
+        getRecommendProduct()
     }, [])
 
     // console.log(reviews);
