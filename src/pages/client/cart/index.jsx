@@ -97,9 +97,9 @@ export default function Cart() {
 
     const getItemYourLike = async () => {
         try {
-            const result = await axios.get(`http://localhost:3006/svdrecommend/${account.id}`)
+            const result = await axios.get(`http://localhost:3006/cfrecommend/${account.id}`)
             if (result.data.statusCode === 200) {
-                // console.log("reuslt recommend cart:: ", result.data.data);
+                console.log("reuslt recommend cart:: ", result.data.data);
                 setItemYourLike(result.data.data)
             }
         } catch (error) {

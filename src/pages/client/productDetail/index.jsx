@@ -55,6 +55,8 @@ export default function ProductDetail() {
     const [selectVariation, setSelectVariation] = useState(product?.variations[0] || {});
     const [size, setSize] = useState(SIZE[3]);
 
+    const [ratingProduct, setRatingProduct] = useState([])
+
     const images = [
         `${product.defaultImage}`,
         ...product.images.map((item) => item.image_path),
@@ -140,6 +142,7 @@ export default function ProductDetail() {
     const getReviews = async () => {
         const result = await instanceAxios.get(`/evaluations/reviews/${product.id}`)
         if (result.data.statusCode === 200) {
+            // console.log("review cho priduct :::", result.data.data);
             setReviews(result.data.data)
         } else {
             message.error("Error get reviews");
@@ -166,12 +169,32 @@ export default function ProductDetail() {
         }
     }
 
+    const getRatingProduct = async () => {
+        try {
+            const result = await axios.get(`http://localhost:3003/evaluations/stars/${product.id}`)
+            if (result.data.statusCode === 200) {
+                console.log("reuslt:: ", result.data.data);
+                setRatingProduct(result.data.data)
+            }
+        } catch (error) {
+            console.log("==>> :: ", error);
+        }
+    }
+
     useEffect(() => {
         getReviews()
-        getRecommendProduct()
+        getRatingProduct()
+        // getRecommendProduct()
     }, [])
 
     // console.log(reviews);
+    // console.log(product);
+    let tbStar = 0
+    if (ratingProduct.length > 0) {
+        tbStar = ratingProduct.reduce((total, item) => total += item.star, 0) / ratingProduct.length
+        tbStar = Math.ceil(tbStar)
+    }
+    console.log(tbStar);
 
     return (
         <>
@@ -310,7 +333,8 @@ export default function ProductDetail() {
                                 <h1 className="text-[20px] uppercase text-[#1b1b1b] font-bold">
                                     Reviews
                                 </h1>
-                                <Rate allowHalf disabled defaultValue={parseInt(product.averageRating)} /> ({product.numberRating})
+                                {/* o day */}
+                                <Rate allowHalf disabled value={parseInt(tbStar)} /> ({ratingProduct.length})
                             </div>
                             <div className="border-b mt-5 mb-9"></div>
                             {/* <div className="flex justify-between">
@@ -587,7 +611,7 @@ export default function ProductDetail() {
                                                         alt=""
                                                     />
                                                     <div className="my-[20px]" style={{ display: "flex", gap: 4 }}>
-                                                        {product.variations.map((variation) => (
+                                                        {product?.variations.map((variation) => (
                                                             <div key={variation.id} className="h-4 w-4 text-[#ababab]"
                                                                 style={{ backgroundColor: `${variation.color}`, border: "1px solid #999" }}
                                                             ></div>
